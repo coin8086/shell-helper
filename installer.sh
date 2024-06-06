@@ -46,37 +46,3 @@ function remove_files
   done
 }
 
-# Override the function by caller of process_cmd_line
-function copy_files
-{
-  local target_dir=$1
-  shift 1
-  local files=("$@")
-
-  for f in "${files[@]}"; do
-    echo "Installing $target_dir/$f"
-  done
-}
-
-function process_cmd_line
-{
-  local target_dir=$1
-  shift 1
-  local files=("$@")
-
-  while getopts "fh" opt; do
-    case $opt in
-      f ) force=1 ;;
-      h ) show_help "$target_dir" "${files[@]}" && exit ;;
-      ? ) show_help "$target_dir" "${files[@]}" && exit 1 ;;
-    esac
-  done
-
-  if [[ -z "$force" ]]; then
-    test_files "$target_dir" "${files[@]}"
-  else
-    remove_files "$target_dir" "${files[@]}"
-  fi
-
-  copy_files "$target_dir" "${files[@]}"
-}
