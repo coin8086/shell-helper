@@ -43,3 +43,39 @@ function remove_files
   done
 }
 
+function copy_files
+{
+  echo "The caller of install should override this function."
+
+  local -n target_dir_ref=$1
+  local -n files_ref=$2
+  for f in "${files_ref[@]}"; do
+    echo "Installing $target_dir_ref/$f"
+  done
+}
+
+function install
+{
+  local -n cmdline_ref=$1 # array of args from cmd line
+  local target_dir_var=$2 # name of variable for target_dir
+  local files_var=$3      # name of variable for files
+  local OPTIND=1
+  local opt
+  local force
+
+  while getopts "fh" opt ${cmdline_ref[@]}; do
+    case $opt in
+      f ) force=1 ;;
+      h ) show_help $target_dir_var $files_var && exit ;;
+      ? ) show_help $target_dir_var $files_var && exit 1 ;;
+    esac
+  done
+
+  if [[ -z "$force" ]]; then
+    test_files $target_dir_var $files_var
+  else
+    remove_files $target_dir_var $files_var
+  fi
+
+  copy_files $target_dir_var $files_var
+}
